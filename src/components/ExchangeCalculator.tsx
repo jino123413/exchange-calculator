@@ -14,7 +14,7 @@ import {
   formatDisplayDate,
 } from '../utils/api';
 
-const INTERSTITIAL_AD_ID = 'ait.v2.live.6a9582ec4e524364';
+const INTERSTITIAL_AD_ID = 'ait.v2.live.71fe38cce9844045';
 
 export default function ExchangeCalculator() {
   const [fromCurrency, setFromCurrency] = useState<CurrencyInfo>(CURRENCIES[1]); // USD
