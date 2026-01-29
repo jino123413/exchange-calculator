@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     appsInToss({
       brand: {
-        displayName: '환율 계산기',
+        displayName: '나만의 환율계산기',
         primaryColor: '#3182F6',
         icon: 'https://static.toss.im/appsintoss/16681/74c03381-5c2d-423e-986f-28255a69f9c6.png',
         bridgeColorMode: 'basic',
