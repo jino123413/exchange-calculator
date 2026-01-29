@@ -211,7 +211,7 @@ export default function ExchangeCalculator() {
       {/* 헤더 */}
       <View style={styles.header}>
         <Text typography="h4" fontWeight="bold" style={styles.headerText}>
-          환율 계산기
+          나만의 환율계산기
         </Text>
         <Text typography="body3" style={styles.headerSubText}>
           {formatDisplayDate(rateDate)}
