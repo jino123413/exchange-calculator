@@ -11,7 +11,7 @@ export default defineConfig({
       brand: {
         displayName: '환율 계산기',
         primaryColor: '#3182F6',
-        icon: 'https://static.toss.im/appsintoss/73/10550764-5ac1-44e2-9ff3-ad78d8d2e71a.png',
+        icon: 'https://static.toss.im/appsintoss/16681/74c03381-5c2d-423e-986f-28255a69f9c6.png',
         bridgeColorMode: 'basic',
       },
       permissions: [],
