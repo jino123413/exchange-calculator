@@ -48,6 +48,17 @@ interface BokResponse {
   };
 }
 
+// 폴백 환율 (API 실패 시 사용, 2026년 2월 기준 근사값)
+const FALLBACK_RATES: Record<string, number> = {
+  USD: 1450.50,
+  JPY: 9.42,
+  EUR: 1510.30,
+  GBP: 1815.20,
+  CNY: 198.75,
+  AUD: 905.60,
+};
+const FALLBACK_DATE = formatDate(new Date());
+
 // 특정 통화의 최근 환율 가져오기 (주말/공휴일 대비 최근 7일 조회)
 export async function fetchLatestRates(): Promise<{
   rates: Record<string, number>; // 통화코드 → 1단위당 KRW
@@ -65,25 +76,33 @@ export async function fetchLatestRates(): Promise<{
 
   const foreignCurrencies = CURRENCIES.filter((c) => c.code !== 'KRW');
 
-  const results = await Promise.allSettled(
-    foreignCurrencies.map(async (currency) => {
-      const url = `${BOK_BASE_URL}/${BOK_API_KEY}/json/kr/1/10/${STAT_CODE}/D/${startDate}/${endDate}/${currency.bokItemCode}`;
-      const response = await fetch(url);
-      const data: BokResponse = await response.json();
+  try {
+    const results = await Promise.allSettled(
+      foreignCurrencies.map(async (currency) => {
+        const url = `${BOK_BASE_URL}/${BOK_API_KEY}/json/kr/1/10/${STAT_CODE}/D/${startDate}/${endDate}/${currency.bokItemCode}`;
+        const response = await fetch(url);
+        const data: BokResponse = await response.json();
 
-      if (data.StatisticSearch?.row && data.StatisticSearch.row.length > 0) {
-        const rows = data.StatisticSearch.row;
-        const latest = rows[rows.length - 1];
-        const value = parseValue(latest.DATA_VALUE);
-        // 1단위 외화당 KRW (JPY는 100엔 기준이므로 1엔 기준으로 변환)
-        rates[currency.code] = value / currency.unit;
+        if (data.StatisticSearch?.row && data.StatisticSearch.row.length > 0) {
+          const rows = data.StatisticSearch.row;
+          const latest = rows[rows.length - 1];
+          const value = parseValue(latest.DATA_VALUE);
+          rates[currency.code] = value / currency.unit;
 
-        if (latest.TIME > latestDate) {
-          latestDate = latest.TIME;
+          if (latest.TIME > latestDate) {
+            latestDate = latest.TIME;
+          }
         }
-      }
-    }),
-  );
+      }),
+    );
+  } catch {
+    // API 호출 자체 실패
+  }
+
+  // API 실패 시 폴백 환율 사용
+  if (Object.keys(rates).length === 0) {
+    return { rates: { ...FALLBACK_RATES }, date: FALLBACK_DATE };
+  }
 
   return { rates, date: latestDate };
 }

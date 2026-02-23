@@ -1,22 +1,19 @@
-import { appsInToss } from '@apps-in-toss/framework/plugins';
-import { router } from '@granite-js/plugin-router';
-import { hermes } from '@granite-js/plugin-hermes';
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from '@apps-in-toss/web-framework/config';
 
 export default defineConfig({
-  scheme: 'intoss',
   appName: 'exchange-calculator',
-  plugins: [
-    appsInToss({
-      brand: {
-        displayName: '나만의 환율계산기',
-        primaryColor: '#3182F6',
-        icon: 'https://static.toss.im/appsintoss/16681/74c03381-5c2d-423e-986f-28255a69f9c6.png',
-        bridgeColorMode: 'basic',
-      },
-      permissions: [],
-    }),
-    router(),
-    hermes(),
-  ],
+  web: {
+    host: '0.0.0.0',
+    port: 3008,
+    commands: { dev: 'rsbuild dev', build: 'rsbuild build' },
+  },
+  permissions: [],
+  outdir: 'dist',
+  brand: {
+    displayName: '나만의 환율계산기',
+    icon: 'https://raw.githubusercontent.com/jino123413/app-logos/master/exchange-calculator.png',
+    primaryColor: '#3182F6',
+    bridgeColorMode: 'basic',
+  },
+  webViewProps: { type: 'partner' },
 });

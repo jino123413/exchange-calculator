@@ -19,34 +19,43 @@ export default function BannerAd({
   const [hasAd, setHasAd] = useState(true);
 
   useEffect(() => {
-    if (!TossAds?.initialize?.isSupported?.()) return;
+    try {
+      if (!TossAds?.initialize?.isSupported?.()) return;
 
-    TossAds.initialize({
-      callbacks: {
-        onInitialized: () => setIsInitialized(true),
-        onInitializationFailed: () => {},
-      },
-    });
+      TossAds.initialize({
+        callbacks: {
+          onInitialized: () => setIsInitialized(true),
+          onInitializationFailed: () => setHasAd(false),
+        },
+      });
+    } catch {
+      setHasAd(false);
+    }
   }, []);
 
   useEffect(() => {
     if (!isInitialized || !containerRef.current) return;
-    if (!TossAds?.attachBanner?.isSupported?.()) return;
 
-    const attached = TossAds.attachBanner(adGroupId, containerRef.current, {
-      theme,
-      tone,
-      variant,
-      callbacks: {
-        onAdRendered: () => setHasAd(true),
-        onNoFill: () => setHasAd(false),
-        onAdFailedToRender: () => setHasAd(false),
-      },
-    });
+    try {
+      if (!TossAds?.attachBanner?.isSupported?.()) return;
 
-    return () => {
-      attached?.destroy();
-    };
+      const attached = TossAds.attachBanner(adGroupId, containerRef.current, {
+        theme,
+        tone,
+        variant,
+        callbacks: {
+          onAdRendered: () => setHasAd(true),
+          onNoFill: () => setHasAd(false),
+          onAdFailedToRender: () => setHasAd(false),
+        },
+      });
+
+      return () => {
+        attached?.destroy();
+      };
+    } catch {
+      setHasAd(false);
+    }
   }, [isInitialized, adGroupId, theme, tone, variant]);
 
   if (!hasAd) return null;
