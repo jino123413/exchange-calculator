@@ -18,21 +18,20 @@ export default function BannerAd({
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasAd, setHasAd] = useState(true);
 
-  // SDK 초기화 (1회)
   useEffect(() => {
-    if (TossAds.initialize.isSupported()) {
-      TossAds.initialize({
-        callbacks: {
-          onInitialized: () => setIsInitialized(true),
-          onInitializationFailed: () => {},
-        },
-      });
-    }
+    if (!TossAds?.initialize?.isSupported?.()) return;
+
+    TossAds.initialize({
+      callbacks: {
+        onInitialized: () => setIsInitialized(true),
+        onInitializationFailed: () => {},
+      },
+    });
   }, []);
 
-  // 배너 부착 + 정리
   useEffect(() => {
     if (!isInitialized || !containerRef.current) return;
+    if (!TossAds?.attachBanner?.isSupported?.()) return;
 
     const attached = TossAds.attachBanner(adGroupId, containerRef.current, {
       theme,
@@ -48,14 +47,14 @@ export default function BannerAd({
     return () => {
       attached?.destroy();
     };
-  }, [isInitialized]);
+  }, [isInitialized, adGroupId, theme, tone, variant]);
 
   if (!hasAd) return null;
 
   return (
     <div
       ref={containerRef}
-      style={{ width: '100%', height: '96px' }}
+      style={{ width: '100%', height: 96 }}
     />
   );
 }
