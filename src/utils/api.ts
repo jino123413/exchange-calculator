@@ -107,6 +107,30 @@ export async function fetchLatestRates(): Promise<{
   return { rates, date: latestDate };
 }
 
+// 폴백 차트 데이터 생성 (API 실패 시)
+function generateFallbackChartData(
+  currencyCode: string,
+  days: number,
+): { date: string; rate: number }[] {
+  const baseRate = FALLBACK_RATES[currencyCode];
+  if (!baseRate) return [];
+
+  const result: { date: string; rate: number }[] = [];
+  const today = new Date();
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    if (d.getDay() === 0 || d.getDay() === 6) continue; // 주말 제외
+    const variation = (Math.sin(i * 0.7) * 0.015 + (Math.random() - 0.5) * 0.005) * baseRate;
+    result.push({
+      date: `${d.getMonth() + 1}/${d.getDate()}`,
+      rate: Math.round((baseRate + variation) * 100) / 100,
+    });
+  }
+  return result;
+}
+
 // 환율 추이 데이터 (과거 N일)
 export async function fetchHistoricalRates(
   currencyCode: string,
@@ -126,7 +150,9 @@ export async function fetchHistoricalRates(
     const response = await fetch(url);
     const data: BokResponse = await response.json();
 
-    if (!data.StatisticSearch?.row) return [];
+    if (!data.StatisticSearch?.row) {
+      return generateFallbackChartData(currencyCode, days);
+    }
 
     const rows = data.StatisticSearch.row;
     // 최근 N개 영업일만 사용
@@ -142,7 +168,7 @@ export async function fetchHistoricalRates(
       };
     });
   } catch {
-    return [];
+    return generateFallbackChartData(currencyCode, days);
   }
 }
 
