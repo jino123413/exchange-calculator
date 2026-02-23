@@ -18,52 +18,44 @@ export default function BannerAd({
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasAd, setHasAd] = useState(true);
 
+  // SDK 초기화 (1회)
   useEffect(() => {
-    try {
-      if (!TossAds?.initialize?.isSupported?.()) return;
-
+    if (TossAds.initialize.isSupported()) {
       TossAds.initialize({
         callbacks: {
           onInitialized: () => setIsInitialized(true),
-          onInitializationFailed: () => setHasAd(false),
+          onInitializationFailed: () => {},
         },
       });
-    } catch {
-      setHasAd(false);
     }
   }, []);
 
+  // 배너 부착 + 정리
   useEffect(() => {
     if (!isInitialized || !containerRef.current) return;
 
-    try {
-      if (!TossAds?.attachBanner?.isSupported?.()) return;
+    const attached = TossAds.attachBanner(adGroupId, containerRef.current, {
+      theme,
+      tone,
+      variant,
+      callbacks: {
+        onAdRendered: () => setHasAd(true),
+        onNoFill: () => setHasAd(false),
+        onAdFailedToRender: () => setHasAd(false),
+      },
+    });
 
-      const attached = TossAds.attachBanner(adGroupId, containerRef.current, {
-        theme,
-        tone,
-        variant,
-        callbacks: {
-          onAdRendered: () => setHasAd(true),
-          onNoFill: () => setHasAd(false),
-          onAdFailedToRender: () => setHasAd(false),
-        },
-      });
-
-      return () => {
-        attached?.destroy();
-      };
-    } catch {
-      setHasAd(false);
-    }
-  }, [isInitialized, adGroupId, theme, tone, variant]);
+    return () => {
+      attached?.destroy();
+    };
+  }, [isInitialized]);
 
   if (!hasAd) return null;
 
   return (
     <div
       ref={containerRef}
-      style={{ width: '100%', height: 96 }}
+      style={{ width: '100%', height: '96px' }}
     />
   );
 }
